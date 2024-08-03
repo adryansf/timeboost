@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: api
+    build: .
+    ports:
+      - ${API_PORT}:3000
+    environment:
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_NAME=${DATABASE_NAME}
+    networks:
+      - timeboost
+
+  postgres:
+    image: postgres:16.2-alpine3.19
+    container_name: api-db
+    ports:
+      - ${DATABASE_PORT}:5432
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    networks:
+      - timeboost
+
+networks:
+  timeboost:
+    driver: bridge
