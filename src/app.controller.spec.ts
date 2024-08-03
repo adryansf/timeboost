@@ -20,7 +20,7 @@ describe('AppController', () => {
     });
 
     it('should return "Hello $name"', () => {
-      expect(appController.getHelloName('$name')).toBe('Hello $name');
+      expect(appController.getHelloName('$name')).toBe('Hello $name!');
     });
   });
 });

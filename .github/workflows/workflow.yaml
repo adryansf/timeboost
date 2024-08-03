@@ -15,4 +15,4 @@ jobs:
       - name: run install and test
         run: |
           npm install
-          npm run test:cov
+          npm run test
