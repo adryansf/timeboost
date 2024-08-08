@@ -14,6 +14,8 @@ services:
       - DATABASE_NAME=${DATABASE_NAME}
     volumes:
       - .:/usr/app
+    depends_on:
+      - postgres
     networks:
       - timeboost
 
