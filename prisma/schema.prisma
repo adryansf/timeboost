@@ -21,5 +21,96 @@ model User{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  tasks Task[]
+  timelogs Timelog[]
+  userChallenges UserChallenge[]
+  rewards Reward[]
+
   @@map("user")
+}
+
+model Task{
+  id Int @id @default(autoincrement())
+  title String
+  description String
+  dueDate DateTime
+  completed Boolean
+  createdAt DateTime @default(now())
+
+  // FK
+  idUser String
+
+  user User @relation(fields: [idUser], references: [id])
+  timelogs Timelog[]
+  
+  @@map("task")
+}
+
+model Timelog{
+  id Int @id @default(autoincrement())
+  startTime DateTime
+  endTime DateTime
+  duration Int
+
+  //FK
+  idUser String
+  idTask Int
+
+  user User @relation(fields: [idUser], references: [id])
+  task Task @relation(fields: [idTask], references: [id])
+
+  @@map("timelogs")
+}
+
+model Challenge{
+  id Int @id @default(autoincrement())
+  title String
+  description String
+  points Int
+
+  startDate DateTime
+  endDate DateTime
+
+  userChallenges UserChallenge[]
+
+  @@map("challenge")
+}
+
+model UserChallenge{
+  id String @id @default(uuid())
+  status String
+
+  // FKs
+  idUser String
+  idChallenge Int
+  
+  completedAt DateTime?
+
+  user User @relation(fields: [idUser], references: [id])
+  challenge Challenge @relation(fields: [idChallenge], references: [id])
+
+  @@map("userChallenge")
+}
+
+model Reward{
+  id String @id @default(uuid())
+  points Int
+  createdAt DateTime @default(now())
+
+  // FK
+  idRewardType Int
+  idUser String
+
+  rewardType RewardType @relation(fields: [idRewardType], references: [id])
+  user User @relation(fields: [idUser], references: [id])
+
+  @@map("reward")
+}
+
+model RewardType{
+  id Int @id @default(autoincrement())
+  reward String
+
+  rewards Reward[]
+  @@map("rewardType")
 }
