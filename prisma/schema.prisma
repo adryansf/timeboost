@@ -15,18 +15,18 @@ datasource db {
 
 model User{
   id String @id @default(uuid())
-  username String
-  email String
+  username String @unique
+  email String @unique
   password String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   tasks Task[]
   timelogs Timelog[]
-  userChallenges UserChallenge[]
+  usersChallenges UsersChallenges[]
   rewards Reward[]
 
-  @@map("user")
+  @@map("users")
 }
 
 model Task{
@@ -43,7 +43,7 @@ model Task{
   user User @relation(fields: [idUser], references: [id])
   timelogs Timelog[]
   
-  @@map("task")
+  @@map("tasks")
 }
 
 model Timelog{
@@ -71,12 +71,12 @@ model Challenge{
   startDate DateTime
   endDate DateTime
 
-  userChallenges UserChallenge[]
+  userChallenges UsersChallenges[]
 
-  @@map("challenge")
+  @@map("challenges")
 }
 
-model UserChallenge{
+model UsersChallenges{
   id String @id @default(uuid())
   status String
 
@@ -89,7 +89,7 @@ model UserChallenge{
   user User @relation(fields: [idUser], references: [id])
   challenge Challenge @relation(fields: [idChallenge], references: [id])
 
-  @@map("userChallenge")
+  @@map("usersChallenges")
 }
 
 model Reward{
@@ -104,7 +104,7 @@ model Reward{
   rewardType RewardType @relation(fields: [idRewardType], references: [id])
   user User @relation(fields: [idUser], references: [id])
 
-  @@map("reward")
+  @@map("rewards")
 }
 
 model RewardType{
@@ -112,5 +112,5 @@ model RewardType{
   reward String
 
   rewards Reward[]
-  @@map("rewardType")
+  @@map("rewardTypes")
 }
