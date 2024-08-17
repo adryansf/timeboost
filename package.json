@@ -76,7 +76,8 @@
     ],
     "collectCoverageFrom": [
       "**/*.controller.(t|j)s",
-      "**/*.service.(t|j)s"
+      "**/*.service.(t|j)s",
+      "**/*.repository.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",

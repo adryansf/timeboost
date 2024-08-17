@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
-import { hash, hashSync } from 'bcrypt';
+import { hashSync } from 'bcrypt';
 import { Exclude } from 'class-transformer';
 
 export class UserEntity implements User {
@@ -17,7 +17,7 @@ export class UserEntity implements User {
   @ApiProperty()
   email: string;
 
-  @Exclude()
+  @Exclude({ toPlainOnly: true })
   password: string;
 
   @ApiProperty()

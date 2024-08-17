@@ -1,5 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 // Dtos
 import { CreateUserDto } from './dto/create-user.dto';
@@ -7,10 +6,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { FindAllUsersDto } from './dto/find-all-users.dto';
 
 // Services
-import { PrismaService } from '@/database/prisma.service';
+import { UserRepository } from './repository/user.repository';
 
 // Messages
-import { MESSAGES } from '@/common/messages';
+import { MESSAGES } from '@/utils/messages';
 
 // Entities
 import { UserEntity } from './entities/user.entity';
@@ -21,41 +20,41 @@ import { PAGINATION } from '@/config/pagination';
 // Interfaces
 import { IConstructorPaginationUsersDto } from './dto/pagination-users.dto';
 
+// Exception
+import {
+  ServiceException,
+  ExceptionTypeEnum,
+} from '@/utils/exceptions/service.exception';
+
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private repository: UserRepository) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
+  async create(createUserDto: CreateUserDto) {
     // Verify if email is unique
-    const existsEmail = await this.prisma.user.findFirst({
-      where: {
-        email: createUserDto.email,
-      },
-    });
+    const existsEmail = await this.repository.findByEmail(createUserDto.email);
 
     if (existsEmail)
-      throw new BadRequestException(
+      throw new ServiceException(
+        ExceptionTypeEnum.BAD_REQUEST,
         MESSAGES.exception.user.BadRequest.EmailNotUnique,
       );
 
     // Verify if username is unique
-    const existsUsername = await this.prisma.user.findFirst({
-      where: {
-        username: createUserDto.username,
-      },
-    });
+    const existsUsername = await this.repository.findByUsername(
+      createUserDto.username,
+    );
 
     if (existsUsername)
-      throw new BadRequestException(
+      throw new ServiceException(
+        ExceptionTypeEnum.BAD_REQUEST,
         MESSAGES.exception.user.BadRequest.UsernameNotUnique,
       );
 
     // Create User
-    const user = await this.prisma.user.create({
-      data: {
-        ...createUserDto,
-        password: UserEntity.encryptPassword(createUserDto.password),
-      },
+    const user = await this.repository.create({
+      ...createUserDto,
+      password: UserEntity.encryptPassword(createUserDto.password),
     });
 
     return user;
@@ -64,37 +63,34 @@ export class UsersService {
   async findAll(queryDto: FindAllUsersDto) {
     const { page = 1 } = queryDto;
 
-    const [count, users] = await this.prisma.$transaction([
-      this.prisma.user.count(),
-      this.prisma.user.findMany({
-        skip: PAGINATION.users * (page - 1),
-        take: PAGINATION.users,
-      }),
-    ]);
+    const [count, users] = await this.repository.findWithPagination({
+      skip: PAGINATION.users * (page - 1),
+      take: PAGINATION.users,
+    });
 
     return { totalUsers: count, users, page } as IConstructorPaginationUsersDto;
   }
 
   async findOne(username: string): Promise<UserEntity> {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        username,
-      },
-    });
+    const user = await this.repository.findByUsername(username);
 
-    if (!user) throw new NotFoundException(MESSAGES.exception.user.NotFound);
+    if (!user)
+      throw new ServiceException(
+        ExceptionTypeEnum.NOT_FOUND,
+        MESSAGES.exception.user.NotFound,
+      );
 
     return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id,
-      },
-    });
+    const user = await this.repository.findById(id);
 
-    if (!user) throw new NotFoundException(MESSAGES.exception.user.NotFound);
+    if (!user)
+      throw new ServiceException(
+        ExceptionTypeEnum.NOT_FOUND,
+        MESSAGES.exception.user.NotFound,
+      );
 
     // Encriptar Senha
     if (updateUserDto.password) {
@@ -103,30 +99,21 @@ export class UsersService {
       );
     }
 
-    const updatedUser = await this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: updateUserDto,
-    });
+    const updatedUser = await this.repository.update(id, updateUserDto);
 
     return updatedUser;
   }
 
   async remove(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id,
-      },
-    });
+    const user = await this.repository.findById(id);
 
-    if (!user) throw new NotFoundException(MESSAGES.exception.user.NotFound);
+    if (!user)
+      throw new ServiceException(
+        ExceptionTypeEnum.NOT_FOUND,
+        MESSAGES.exception.user.NotFound,
+      );
 
-    await this.prisma.user.delete({
-      where: {
-        id,
-      },
-    });
+    await this.repository.delete(id);
 
     return;
   }

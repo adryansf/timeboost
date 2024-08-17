@@ -12,9 +12,10 @@ export interface IConstructorPaginationUsersDto {
   page: number;
 }
 
+// Validações
 export class PaginationUsersDto {
   constructor({ users, totalUsers, page }: IConstructorPaginationUsersDto) {
-    this.users = users;
+    this.users = users.map((u) => new UserEntity(u));
     this.usersInPage = users.length;
     this.totalUsers = totalUsers;
     this.totalPages = Math.ceil(totalUsers / PAGINATION.users);

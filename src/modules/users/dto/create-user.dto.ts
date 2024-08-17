@@ -1,8 +1,9 @@
 import { IsEmail, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { MESSAGES } from '@/common/messages';
+import { MESSAGES } from '@/utils/messages';
 
+// Validações
 export class CreateUserDto {
   @ApiProperty({ uniqueItems: true })
   @IsEmail({}, { message: MESSAGES.validation.IsEmail('email') })
