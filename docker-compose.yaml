@@ -1,25 +1,6 @@
 version: '3.8'
 
 services:
-  api:
-    container_name: api
-    build: .
-    ports:
-      - ${API_PORT}:3000
-    environment:
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=${DATABASE_PORT}
-      - DATABASE_NAME=${DATABASE_NAME}
-    volumes:
-      - .:/usr/app
-      - /usr/app/node_modules
-    depends_on:
-      - postgres
-    networks:
-      - timeboost
-
   postgres:
     image: postgres:16.2-alpine3.19
     container_name: api-db
