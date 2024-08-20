@@ -36,6 +36,7 @@ describe('UsersController', () => {
       updatedAt: new Date(),
       password: '12345678',
       email: `user${i}@timeboost.com`,
+      idLevel: 1,
     }));
 
     const module: TestingModule = await Test.createTestingModule({
@@ -48,6 +49,7 @@ describe('UsersController', () => {
               const createdUser = {
                 id: randomUUID(),
                 ...dto,
+                idLevel: 1,
                 createdAt: new Date(),
                 updatedAt: new Date(),
               };

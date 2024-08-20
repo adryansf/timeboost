@@ -24,6 +24,7 @@ describe('UserRepository', () => {
     users = [...Array(15).keys()].map((i) => ({
       id: randomUUID(),
       username: `user${i}`,
+      idLevel: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
       password: '12345678',
@@ -44,6 +45,7 @@ describe('UserRepository', () => {
                 const createdUser = {
                   id: randomUUID(),
                   ...data,
+                  idLevel: 1,
                   createdAt: new Date(),
                   updatedAt: new Date(),
                 };
