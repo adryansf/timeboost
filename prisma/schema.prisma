@@ -21,10 +21,16 @@ model User{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // FK
+  idLevel Int
+
   tasks Task[]
   timelogs Timelog[]
   usersChallenges UsersChallenges[]
   rewards Reward[]
+
+
+  level Level @relation(fields: [idLevel], references: [id])
 
   @@map("users")
 }
@@ -94,6 +100,7 @@ model UsersChallenges{
 
 model Reward{
   id String @id @default(uuid())
+  type String
   points Int
   createdAt DateTime @default(now())
 
@@ -101,16 +108,17 @@ model Reward{
   idRewardType Int
   idUser String
 
-  rewardType RewardType @relation(fields: [idRewardType], references: [id])
   user User @relation(fields: [idUser], references: [id])
 
   @@map("rewards")
 }
 
-model RewardType{
+model Level{
   id Int @id @default(autoincrement())
-  reward String
+  name String
+  pointsRequired Int
 
-  rewards Reward[]
-  @@map("rewardTypes")
+  users User[]
+
+  @@map("levels")
 }

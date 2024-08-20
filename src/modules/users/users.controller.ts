@@ -8,8 +8,6 @@ import {
   Delete,
   HttpCode,
   Query,
-  InternalServerErrorException,
-  BadRequestException,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 

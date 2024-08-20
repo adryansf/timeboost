@@ -67,7 +67,7 @@ export class UserRepository implements IUserRepository {
 
   async create(createUserDto: CreateUserDto) {
     return this.prisma.user.create({
-      data: createUserDto,
+      data: { ...createUserDto, idLevel: 1 },
     });
   }
 

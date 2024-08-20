@@ -32,6 +32,7 @@ describe('UsersService', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       password: '12345678',
+      idLevel: 1,
       email: `user${i}@timeboost.com`,
     }));
 
@@ -57,6 +58,7 @@ describe('UsersService', () => {
               const createdUser = {
                 id: randomUUID(),
                 ...data,
+                idLevel: 1,
                 createdAt: new Date(),
                 updatedAt: new Date(),
               };
