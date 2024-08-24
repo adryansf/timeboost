@@ -12,14 +12,7 @@ describe('LevelsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [LevelsController],
-      providers: [
-        {
-          provide: LevelsService,
-          useValue: {
-            create: () => {},
-          },
-        },
-      ],
+      providers: [],
     }).compile();
 
     controller = module.get<LevelsController>(LevelsController);

@@ -7,15 +7,7 @@ describe('LevelsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        LevelsService,
-        {
-          provide: LevelRepository,
-          useValue: {
-            create: () => {},
-          },
-        },
-      ],
+      providers: [LevelsService],
     }).compile();
 
     service = module.get<LevelsService>(LevelsService);
