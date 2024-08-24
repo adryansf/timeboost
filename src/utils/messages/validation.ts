@@ -6,4 +6,6 @@ export const validationMessages = {
   IsUUID: (fieldName: string) => `O campo ${fieldName} deve ser um UUID.`,
   IsNumber: (fieldName: string) => `O campo ${fieldName} deve ser um número.`,
   IsInt: (fieldName: string) => `O campo ${fieldName} deve ser um inteiro.`,
+  IsPositive: (fieldName: string) =>
+    `O campo ${fieldName} deve ser um valor positivo.`,
 };
