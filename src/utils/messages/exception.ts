@@ -6,4 +6,7 @@ export const exceptionMessages = {
     },
     NotFound: 'Usuário não encontrado.',
   },
+  task: {
+    NotFound: 'Tarefa não encontrada.',
+  },
 };
