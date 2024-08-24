@@ -6,4 +6,7 @@ export const exceptionMessages = {
     },
     NotFound: 'Usuário não encontrado.',
   },
+  level: {
+    NotFound: 'Level não encontrado.',
+  },
 };
