@@ -1,3 +1,4 @@
+import { FindAllUsersDto } from './../../users/dto/find-all-users.dto';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Task } from '@prisma/client';
 import { randomUUID } from 'crypto';
@@ -68,5 +69,37 @@ describe('TasksService', () => {
     const result = await repository.create(taskToCreate);
     // Assert
     expect(result).toBe(tasks[tasks.length - 1]);
+  });
+
+  it('should return all tasks', async () => {
+    // Act
+    const result = await repository.findAll();
+    // Assert
+    expect(result).toBe(tasks);
+    expect(result.length).toBe(1);
+  });
+
+  it('should return a task by id', async () => {
+    // Act
+    const result = await repository.findById(1);
+    // Assert
+    expect(result).toBe(tasks[0]); // Verifica se a tarefa retornada é a que possui o id 1
+  });
+
+  it('should update a task by id', async () => {
+    // Arrange
+    const updateData: Partial<Task> = { title: 'Updated Task Title' };
+    // Act
+    const result = await repository.update(1, updateData);
+    // Assert
+    expect(result.title).toBe(updateData.title); // Verifica se o título foi atualizado
+  });
+
+  it('should delete a task by id', async () => {
+    // Act
+    const result = await repository.delete(1);
+    // Assert
+    expect(result).toBe(tasks[0]); // Verifica se a tarefa deletada é a correta
+    expect(tasks.length).toBe(0); // Verifica se a tarefa foi removida da lista
   });
 });
