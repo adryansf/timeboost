@@ -67,16 +67,24 @@ describe('TasksService', () => {
               tasks.push(createdTask);
               return createdTask;
             }),
+            findById: jest.fn((id: number) => {
+              return tasks.find((task) => task.id === id);
+            }),
+            update: jest.fn((id: number, data: UpdateTaskDto) => {
+              const taskIndex = tasks.findIndex((task) => task.id === id);
+              tasks[taskIndex] = { ...tasks[taskIndex], ...data };
+              return tasks[taskIndex];
+            }),
+            delete: jest.fn((id: number) => {
+              const taskIndex = tasks.findIndex((task) => task.id === id);
+              return tasks.splice(taskIndex, 1)[0];
+            }),
           },
         },
       ],
     }).compile();
 
     service = module.get<TasksService>(TasksService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
   });
 
   it('should create an Task', async () => {
@@ -221,5 +229,14 @@ describe('TasksService', () => {
 
     // Act & Assert
     await expect(service.remove(999)).rejects.toThrow(NotFoundException);
+  });
+
+  it('should return all tasks', async () => {
+    // Act
+    const result = await service.findAll();
+
+    // Assert
+    expect(result).toBe(tasks);
+    expect(service['repoTask'].findAll).toHaveBeenCalled();
   });
 });
