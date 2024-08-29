@@ -2,28 +2,11 @@ import { PrismaService } from '@/database/prisma.service';
 import { User } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
-// Dtos
-import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
-
-export interface IUserRepository {
-  findByUsername: (username: string) => Promise<User>;
-  findById: (id: string) => Promise<User>;
-  findByEmail: (email: string) => Promise<User>;
-  findWithPagination: (pagination: {
-    take: number;
-    skip: number;
-  }) => Promise<[number, User[]]>;
-  create: (createUserDto: CreateUserDto) => Promise<User>;
-  update: (id: string, updateUser: UpdateUserDto) => Promise<User>;
-  delete: (id: string) => Promise<User>;
-}
-
 @Injectable()
-export class UserRepository implements IUserRepository {
+export class UserRepository {
   constructor(private prisma: PrismaService) {}
 
-  async findByUsername(username: string) {
+  async findByUsername(username: string): Promise<User> {
     return this.prisma.user.findFirst({
       where: {
         username,
@@ -31,7 +14,7 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async findById(id: string) {
+  async findById(id: string): Promise<User> {
     return this.prisma.user.findUnique({
       where: {
         id,
@@ -39,7 +22,7 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(email: string): Promise<User> {
     return this.prisma.user.findFirst({
       where: {
         email,
@@ -47,7 +30,7 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<User> {
     return this.prisma.user.delete({
       where: {
         id,
@@ -55,7 +38,13 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async findWithPagination({ take, skip }: { take: number; skip: number }) {
+  async findWithPagination({
+    take,
+    skip,
+  }: {
+    take: number;
+    skip: number;
+  }): Promise<[number, User[]]> {
     return this.prisma.$transaction([
       this.prisma.user.count(),
       this.prisma.user.findMany({
@@ -65,18 +54,20 @@ export class UserRepository implements IUserRepository {
     ]);
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(
+    data: Omit<Omit<Omit<User, 'id'>, 'createdAt'>, 'updatedAt'>,
+  ): Promise<User> {
     return this.prisma.user.create({
-      data: { ...createUserDto, idLevel: 1 },
+      data,
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, data: Partial<User>): Promise<User> {
     return this.prisma.user.update({
       where: {
         id,
       },
-      data: updateUserDto,
+      data,
     });
   }
 }

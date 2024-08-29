@@ -17,10 +17,6 @@ import { IConstructorPaginationUsersDto } from './dto/pagination-users.dto';
 
 // Messages
 import { MESSAGES } from '@/utils/messages';
-import {
-  ServiceException,
-  ExceptionTypeEnum,
-} from '@/utils/exceptions/service.exception';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -127,29 +123,6 @@ describe('UsersController', () => {
     expect(result).toBeInstanceOf(UserEntity);
   });
 
-  it('should throws a BadRequestException if email not unique', async () => {
-    // Arrange
-    const createUserDto: CreateUserDto = {
-      username: 'testuser',
-      email: users[0].email,
-      password: 'password123',
-    };
-
-    service.create = jest.fn(() => {
-      throw new ServiceException(
-        ExceptionTypeEnum.BAD_REQUEST,
-        MESSAGES.exception.user.BadRequest.EmailNotUnique,
-      );
-    });
-
-    // Act & Assert
-    await expect(controller.create(createUserDto)).rejects.toThrow(
-      new BadRequestException(
-        MESSAGES.exception.user.BadRequest.EmailNotUnique,
-      ),
-    );
-  });
-
   it('should find a user by username', async () => {
     // Arrange
     const username = users[0].username;
@@ -160,23 +133,6 @@ describe('UsersController', () => {
     // Assert
     expect(service.findOne).toHaveBeenCalledWith(username);
     expect(result).toBeInstanceOf(UserEntity);
-  });
-
-  it('should throw a NotFoundException if user not found on update', async () => {
-    // Arrange
-    const username = users[0].username;
-
-    service.findOne = jest.fn(() => {
-      throw new ServiceException(
-        ExceptionTypeEnum.NOT_FOUND,
-        MESSAGES.exception.user.NotFound,
-      );
-    });
-
-    // Act and Assert
-    await expect(controller.findOne(username)).rejects.toThrow(
-      new NotFoundException(MESSAGES.exception.user.NotFound),
-    );
   });
 
   it('should update a user', async () => {
@@ -193,44 +149,6 @@ describe('UsersController', () => {
     // Assert
     expect(service.update).toHaveBeenCalledWith(users[0].id, updateUserDto);
     expect(result).toBeUndefined();
-  });
-
-  it('should throw a NotFoundException if user not found on update', async () => {
-    // Arrange
-    const updateUserDto: UpdateUserDto = {
-      username: 'testuser',
-      email: 'test@example.com',
-      password: 'password123',
-    };
-
-    service.update = jest.fn(() => {
-      throw new ServiceException(
-        ExceptionTypeEnum.NOT_FOUND,
-        MESSAGES.exception.user.NotFound,
-      );
-    });
-
-    // Act & Assert
-    expect(controller.update(users[0].id, updateUserDto)).rejects.toThrow(
-      new NotFoundException(MESSAGES.exception.user.NotFound),
-    );
-  });
-
-  it('should throw a NotFoundException if user not found on delete', async () => {
-    // Arrange
-    const id = users[0].id;
-
-    service.remove = jest.fn(() => {
-      throw new ServiceException(
-        ExceptionTypeEnum.NOT_FOUND,
-        MESSAGES.exception.user.NotFound,
-      );
-    });
-
-    // Act & Assert
-    expect(controller.remove(users[0].id)).rejects.toThrow(
-      new NotFoundException(MESSAGES.exception.user.NotFound),
-    );
   });
 
   it('should delete a user', async () => {

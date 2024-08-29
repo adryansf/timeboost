@@ -116,6 +116,11 @@ describe('UserRepository', () => {
     // Act
     const result = await repository.findByUsername(username);
     // Assert
+    expect(prisma.user.findFirst).toHaveBeenCalledWith({
+      where: {
+        username,
+      },
+    });
     expect(result).toBe(users[0]);
   });
 
@@ -125,6 +130,11 @@ describe('UserRepository', () => {
     // Act
     const result = await repository.findById(id);
     // Assert
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: {
+        id,
+      },
+    });
     expect(result).toBe(users[0]);
   });
 
@@ -134,6 +144,11 @@ describe('UserRepository', () => {
     // Act
     const result = await repository.findByEmail(email);
     // Assert
+    expect(prisma.user.findFirst).toHaveBeenCalledWith({
+      where: {
+        email,
+      },
+    });
     expect(result).toBe(users[0]);
   });
 
@@ -143,6 +158,11 @@ describe('UserRepository', () => {
     // Act
     const result = await repository.delete(user.id);
     // Assert
+    expect(prisma.user.delete).toHaveBeenCalledWith({
+      where: {
+        id: user.id,
+      },
+    });
     expect(result).toBe(user);
   });
 
@@ -156,36 +176,40 @@ describe('UserRepository', () => {
     });
 
     // Assert
+    expect(prisma.$transaction).toHaveBeenCalled();
     expect(result).toEqual([users.length, users]);
   });
 
   it('should return a created user', async () => {
     // Arrange
-    const createUserDto: CreateUserDto = {
+    const data: Omit<Omit<Omit<User, 'id'>, 'createdAt'>, 'updatedAt'> = {
       email: 'testeuser@gmail.com',
       username: 'testuser',
       password: '12345678',
+      idLevel: 1,
     };
     // Act
-    const result = await repository.create(createUserDto);
+    const result = await repository.create(data);
     // Assert
-    expect(result).toEqual({ ...users[users.length - 1], ...createUserDto });
+    expect(prisma.user.create).toHaveBeenCalledWith({ data });
+    expect(result).toEqual({ ...users[users.length - 1], ...data });
   });
 
   it('should return a updated user', async () => {
     // Arrange
     const id = users[0].id;
-    const updateUserDto: UpdateUserDto = {
+    const data: Partial<User> = {
       email: 'testeuser@gmail.com',
       username: 'testuser',
       password: '12345678',
     };
     // Act
-    const result = await repository.update(id, updateUserDto);
+    const result = await repository.update(id, data);
     // Assert
+    expect(prisma.user.update).toHaveBeenCalledWith({ where: { id }, data });
     expect(result).toEqual({
       ...users[0],
-      ...updateUserDto,
+      ...data,
     });
   });
 });
