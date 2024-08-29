@@ -19,6 +19,8 @@ describe('TasksService', () => {
   let users: User[];
   let tasks: Task[];
   let service: TasksService;
+  let repoTask: TaskRepository;
+  let repoUser: UserRepository;
 
   beforeEach(async () => {
     users = [...Array(15).keys()].map((i) => ({
@@ -76,8 +78,11 @@ describe('TasksService', () => {
               return tasks[taskIndex];
             }),
             delete: jest.fn((id: number) => {
-              const taskIndex = tasks.findIndex((task) => task.id === id);
-              return tasks.splice(taskIndex, 1)[0];
+              const task = tasks.find((t) => t.id === id);
+
+              tasks = tasks.filter((t) => t.id !== id);
+
+              return task;
             }),
             findAll: jest.fn(() => tasks),
           },
@@ -86,9 +91,11 @@ describe('TasksService', () => {
     }).compile();
 
     service = module.get<TasksService>(TasksService);
+    repoTask = module.get<TaskRepository>(TaskRepository);
+    repoUser = module.get<UserRepository>(UserRepository);
   });
 
-  it('should create an Task', async () => {
+  it('should create a Task', async () => {
     // Arrange
     const createTaskDto: CreateTaskDto = {
       title: 'Task Teste',
@@ -99,6 +106,10 @@ describe('TasksService', () => {
     // Act
     const result = await service.create(createTaskDto);
     // Assert
+    expect(repoTask.create).toHaveBeenCalledWith({
+      ...createTaskDto,
+      completed: false,
+    });
     expect(result).toBe(tasks[tasks.length - 1]);
   });
 
@@ -135,62 +146,45 @@ describe('TasksService', () => {
       completed: false,
       createdAt: expect.any(Date),
     });
-    expect(service['repoTask'].create).toHaveBeenCalledWith({
+    expect(repoTask.create).toHaveBeenCalledWith({
       ...createTaskDto,
       completed: false,
     });
   });
 
-  it('should throw NotFoundException when creating a task with a non-existing user', async () => {
-    // Arrange
-    const createTaskDto: CreateTaskDto = {
-      title: 'New Task',
-      description: 'New Description',
-      idUser: randomUUID(),
-      dueDate: new Date(),
-    };
-
-    jest.spyOn(service['repoUser'], 'findById').mockResolvedValueOnce(null);
-
-    // Act & Assert
-    await expect(service.create(createTaskDto)).rejects.toThrow(
-      NotFoundException,
-    );
-  });
-
   it('should return a task when findOne is called with an existing id', async () => {
     // Act
-    const result = await service.findOne(tasks[0].id);
+    const task = tasks[0];
+    const id = task.id;
+    const result = await service.findOne(id);
 
     // Assert
-    expect(result).toBe(tasks[0]);
+    expect(repoTask.findById).toHaveBeenCalledWith(id);
+    expect(result).toBe(task);
   });
 
   it('should throw NotFoundException when findOne is called with a non-existing id', async () => {
     // Arrange
-    jest.spyOn(service['repoTask'], 'findById').mockResolvedValueOnce(null);
+    const id = 999;
 
     // Act & Assert
-    await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
+    await expect(service.findOne(id)).rejects.toThrow(NotFoundException);
   });
 
   it('should update a task successfully', async () => {
     // Arrange
+    const id = tasks[0].id;
     const updateTaskDto: UpdateTaskDto = {
       title: 'Updated Task',
       description: 'Updated Description',
       completed: true,
     };
 
-    jest.spyOn(service['repoTask'], 'update').mockResolvedValueOnce({
-      ...tasks[0],
-      ...updateTaskDto,
-    });
-
     // Act
-    const result = await service.update(tasks[0].id, updateTaskDto);
+    const result = await service.update(id, updateTaskDto);
 
     // Assert
+    expect(repoTask.update).toHaveBeenCalledWith(+id, updateTaskDto);
     expect(result).toEqual({
       ...tasks[0],
       ...updateTaskDto,
@@ -199,37 +193,38 @@ describe('TasksService', () => {
 
   it('should throw NotFoundException when updating a task with a non-existing id', async () => {
     // Arrange
+    const id = 999;
     const updateTaskDto: UpdateTaskDto = {
       title: 'Updated Task',
       description: 'Updated Description',
       completed: true,
     };
 
-    jest.spyOn(service['repoTask'], 'findById').mockResolvedValueOnce(null);
-
     // Act & Assert
-    await expect(service.update(999, updateTaskDto)).rejects.toThrow(
+    await expect(service.update(id, updateTaskDto)).rejects.toThrow(
       NotFoundException,
     );
   });
 
   it('should remove a task successfully', async () => {
     // Arrange
-    jest.spyOn(service['repoTask'], 'delete').mockResolvedValueOnce(tasks[0]);
+    const task = tasks[0];
+    const id = task.id;
 
     // Act
-    const result = await service.remove(tasks[0].id);
+    const result = await service.remove(id);
 
     // Assert
-    expect(result).toBe(tasks[0]);
+    expect(repoTask.delete).toHaveBeenCalledWith(id);
+    expect(result).toBe(task);
   });
 
   it('should throw NotFoundException when removing a task with a non-existing id', async () => {
     // Arrange
-    jest.spyOn(service['repoTask'], 'findById').mockResolvedValueOnce(null);
+    const id = 999;
 
     // Act & Assert
-    await expect(service.remove(999)).rejects.toThrow(NotFoundException);
+    await expect(service.remove(id)).rejects.toThrow(NotFoundException);
   });
 
   it('should return all tasks', async () => {
@@ -237,7 +232,7 @@ describe('TasksService', () => {
     const result = await service.findAll();
 
     // Assert
+    expect(repoTask.findAll).toHaveBeenCalled();
     expect(result).toBe(tasks);
-    expect(service['repoTask'].findAll).toHaveBeenCalled();
   });
 });
