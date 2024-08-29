@@ -10,14 +10,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 // Repository
-import { UserRepository, IUserRepository } from './repository/user.repository';
+import { UserRepository } from './repository/user.repository';
 
 // Utils
 import { MESSAGES } from '@/utils/messages';
-import {
-  ServiceException,
-  ExceptionTypeEnum,
-} from '@/utils/exceptions/service.exception';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -83,7 +80,7 @@ describe('UsersService', () => {
 
               return user;
             }),
-          } as IUserRepository,
+          },
         },
       ],
     }).compile();
@@ -112,6 +109,7 @@ describe('UsersService', () => {
     expect(result).toEqual(users[users.length - 1]);
     expect(repository.create).toHaveBeenCalledWith({
       ...createUserDto,
+      idLevel: 1,
       password: expect.any(String),
     });
 
@@ -133,8 +131,7 @@ describe('UsersService', () => {
 
     // Act and Assert
     await expect(service.create(createUserDto)).rejects.toThrow(
-      new ServiceException(
-        ExceptionTypeEnum.BAD_REQUEST,
+      new BadRequestException(
         MESSAGES.exception.user.BadRequest.EmailNotUnique,
       ),
     );
@@ -150,8 +147,7 @@ describe('UsersService', () => {
 
     // Act and Assert
     await expect(service.create(createUserDto)).rejects.toThrow(
-      new ServiceException(
-        ExceptionTypeEnum.BAD_REQUEST,
+      new BadRequestException(
         MESSAGES.exception.user.BadRequest.UsernameNotUnique,
       ),
     );
@@ -175,10 +171,7 @@ describe('UsersService', () => {
 
     // Act and Assert
     await expect(service.findOne(username)).rejects.toThrow(
-      new ServiceException(
-        ExceptionTypeEnum.NOT_FOUND,
-        MESSAGES.exception.user.NotFound,
-      ),
+      new NotFoundException(MESSAGES.exception.user.NotFound),
     );
   });
 
@@ -210,32 +203,27 @@ describe('UsersService', () => {
   it('should throw an error if user not found on update', async () => {
     // Act and Assert
     await expect(service.update(randomUUID(), {})).rejects.toThrow(
-      new ServiceException(
-        ExceptionTypeEnum.NOT_FOUND,
-        MESSAGES.exception.user.NotFound,
-      ),
+      new NotFoundException(MESSAGES.exception.user.NotFound),
     );
   });
 
   it('should delete a user', async () => {
     // Arrange
-    const id = users[0].id;
+    const userToDelete = users[0];
+    const id = userToDelete.id;
 
     // Act
     const result = await service.remove(id);
 
     // Assert
-    expect(result).toBeUndefined();
+    expect(result).toBe(userToDelete);
     expect(repository.delete).toHaveBeenCalledWith(id);
   });
 
   it('should throw an error if user not found on delete', async () => {
     // Act and Assert
     await expect(service.remove(randomUUID())).rejects.toThrow(
-      new ServiceException(
-        ExceptionTypeEnum.NOT_FOUND,
-        MESSAGES.exception.user.NotFound,
-      ),
+      new NotFoundException(MESSAGES.exception.user.NotFound),
     );
   });
 

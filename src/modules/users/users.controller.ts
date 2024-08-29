@@ -20,9 +20,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { FindAllUsersDto } from './dto/find-all-users.dto';
 import { PaginationUsersDto } from './dto/pagination-users.dto';
 
-// Handlers
-import { serviceExceptionHandler } from '@/common/handlers/exceptions/service';
-
 // Entity
 import { UserEntity } from './entities/user.entity';
 
@@ -34,12 +31,8 @@ export class UsersController {
   @ApiResponse({ type: UserEntity })
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    try {
-      const user = await this.usersService.create(createUserDto);
-      return new UserEntity(user);
-    } catch (err) {
-      serviceExceptionHandler(err);
-    }
+    const user = await this.usersService.create(createUserDto);
+    return new UserEntity(user);
   }
 
   @ApiResponse({ type: PaginationUsersDto })
@@ -55,32 +48,21 @@ export class UsersController {
   @ApiResponse({ type: UserEntity })
   @Get(':username')
   async findOne(@Param('username') username: string) {
-    try {
-      const user = await this.usersService.findOne(username);
-      return new UserEntity(user);
-    } catch (err) {
-      serviceExceptionHandler(err);
-    }
+    const user = await this.usersService.findOne(username);
+    return new UserEntity(user);
   }
 
   @Patch(':id')
   @HttpCode(204)
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    try {
-      await this.usersService.update(id, updateUserDto);
-    } catch (err) {
-      serviceExceptionHandler(err);
-    }
+    await this.usersService.update(id, updateUserDto);
+    return;
   }
 
   @Delete(':id')
   @HttpCode(204)
   async remove(@Param('id') id: string) {
-    try {
-      await this.usersService.remove(id);
-      return;
-    } catch (err) {
-      serviceExceptionHandler(err);
-    }
+    await this.usersService.remove(id);
+    return;
   }
 }

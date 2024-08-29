@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 // Dtos
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,12 +24,6 @@ import { PAGINATION } from '@/config/pagination';
 // Interfaces
 import { IConstructorPaginationUsersDto } from './dto/pagination-users.dto';
 
-// Exception
-import {
-  ServiceException,
-  ExceptionTypeEnum,
-} from '@/utils/exceptions/service.exception';
-
 @Injectable()
 export class UsersService {
   constructor(private repository: UserRepository) {}
@@ -35,8 +33,7 @@ export class UsersService {
     const existsEmail = await this.repository.findByEmail(createUserDto.email);
 
     if (existsEmail)
-      throw new ServiceException(
-        ExceptionTypeEnum.BAD_REQUEST,
+      throw new BadRequestException(
         MESSAGES.exception.user.BadRequest.EmailNotUnique,
       );
 
@@ -46,8 +43,7 @@ export class UsersService {
     );
 
     if (existsUsername)
-      throw new ServiceException(
-        ExceptionTypeEnum.BAD_REQUEST,
+      throw new BadRequestException(
         MESSAGES.exception.user.BadRequest.UsernameNotUnique,
       );
 
@@ -55,6 +51,7 @@ export class UsersService {
     const user = await this.repository.create({
       ...createUserDto,
       password: UserEntity.encryptPassword(createUserDto.password),
+      idLevel: 1,
     });
 
     return user;
@@ -74,11 +71,7 @@ export class UsersService {
   async findOne(username: string): Promise<UserEntity> {
     const user = await this.repository.findByUsername(username);
 
-    if (!user)
-      throw new ServiceException(
-        ExceptionTypeEnum.NOT_FOUND,
-        MESSAGES.exception.user.NotFound,
-      );
+    if (!user) throw new NotFoundException(MESSAGES.exception.user.NotFound);
 
     return user;
   }
@@ -86,11 +79,7 @@ export class UsersService {
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.repository.findById(id);
 
-    if (!user)
-      throw new ServiceException(
-        ExceptionTypeEnum.NOT_FOUND,
-        MESSAGES.exception.user.NotFound,
-      );
+    if (!user) throw new NotFoundException(MESSAGES.exception.user.NotFound);
 
     // Encriptar Senha
     if (updateUserDto.password) {
@@ -107,14 +96,8 @@ export class UsersService {
   async remove(id: string) {
     const user = await this.repository.findById(id);
 
-    if (!user)
-      throw new ServiceException(
-        ExceptionTypeEnum.NOT_FOUND,
-        MESSAGES.exception.user.NotFound,
-      );
+    if (!user) throw new NotFoundException(MESSAGES.exception.user.NotFound);
 
-    await this.repository.delete(id);
-
-    return;
+    return this.repository.delete(id);
   }
 }
