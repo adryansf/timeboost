@@ -42,6 +42,7 @@ describe('LevelsController', () => {
   it('should be defined', () => {
     // Assert
     expect(controller).toBeDefined();
+    expect(service).toBeDefined();
   });
 
   it('should create a level', async () => {
@@ -70,6 +71,7 @@ describe('LevelsController', () => {
     const result = await controller.findAll();
 
     // Assert
+    expect(service.findAll).toHaveBeenCalled();
     expect(result).toEqual([
       new LevelEntity({ id: 1, name: 'Level 1', pointsRequired: 100 }),
       new LevelEntity({ id: 2, name: 'Level 2', pointsRequired: 200 }),

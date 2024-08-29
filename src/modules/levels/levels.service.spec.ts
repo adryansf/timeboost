@@ -76,6 +76,7 @@ describe('LevelsService', () => {
     const result = await service.findAll();
 
     // Assert
+    expect(repository.findAll).toHaveBeenCalled();
     expect(result).toEqual([
       { id: 1, name: 'Level 1', pointsRequired: 100 },
       { id: 2, name: 'Level 2', pointsRequired: 200 },
@@ -84,15 +85,17 @@ describe('LevelsService', () => {
 
   it('should update a level', async () => {
     // Arrange
+    const id = 1;
     const updateLevelDto: UpdateLevelDto = {
       name: 'Updated Level',
       pointsRequired: 150,
     };
 
     // Act
-    const result = await service.update(1, updateLevelDto);
+    const result = await service.update(id, updateLevelDto);
 
     // Assert
+    expect(repository.update).toHaveBeenCalledWith(id, updateLevelDto);
     expect(result).toEqual({
       id: 1,
       name: 'Updated Level',

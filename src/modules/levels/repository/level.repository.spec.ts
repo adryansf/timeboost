@@ -59,6 +59,7 @@ describe('LevelRepository', () => {
   it('should be defined', () => {
     // Assert
     expect(repository).toBeDefined();
+    expect(prismaService).toBeDefined();
   });
 
   it('should create a level', async () => {
