@@ -9,9 +9,10 @@ import { PrismaService } from '@/database/prisma.service';
 // Repository
 import { TaskRepository } from './task.repository';
 
-describe('TasksService', () => {
+describe('TasksRepository', () => {
   let tasks: Task[];
   let repository: TaskRepository;
+  let prisma: PrismaService;
 
   beforeEach(async () => {
     tasks = [
@@ -33,15 +34,48 @@ describe('TasksService', () => {
           provide: PrismaService,
           useValue: {
             task: {
-              create: jest.fn((data: Omit<Omit<Task, 'id'>, 'createdAt'>) => {
-                const createdTask = {
-                  id: tasks[tasks.length - 1].id + 1,
-                  ...data,
-                  createdAt: new Date(),
-                } as Task;
+              create: jest.fn(
+                ({ data }: { data: Omit<Omit<Task, 'id'>, 'createdAt'> }) => {
+                  const createdTask = {
+                    id: tasks[tasks.length - 1].id + 1,
+                    ...data,
+                    createdAt: new Date(),
+                  } as Task;
 
-                tasks.push(createdTask);
-                return createdTask;
+                  tasks.push(createdTask);
+                  return createdTask;
+                },
+              ),
+              findMany: jest.fn(() => tasks),
+              findUnique: jest.fn((params: { where: { id: number } }) =>
+                tasks.find((task) => task.id === params.where.id),
+              ),
+              update: jest.fn(
+                ({
+                  data,
+                  where,
+                }: {
+                  data: Partial<Task>;
+                  where: { id: number };
+                }) => {
+                  const updatedTask = {
+                    ...tasks.find((t) => t.id === where.id),
+                    ...data,
+                  };
+
+                  tasks = tasks.map((t) =>
+                    t.id === where.id ? updatedTask : t,
+                  );
+
+                  return updatedTask;
+                },
+              ),
+              delete: jest.fn(({ where }: { where: { id: number } }) => {
+                const task = tasks.find((t) => t.id === where.id);
+
+                tasks = tasks.filter((t) => t.id !== where.id);
+
+                return task;
               }),
             },
           },
@@ -50,10 +84,12 @@ describe('TasksService', () => {
     }).compile();
 
     repository = module.get<TaskRepository>(TaskRepository);
+    prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should be defined', () => {
     expect(repository).toBeDefined();
+    expect(prisma).toBeDefined();
   });
 
   it('should return a Task Created', async () => {
@@ -68,6 +104,7 @@ describe('TasksService', () => {
     // Act
     const result = await repository.create(taskToCreate);
     // Assert
+    expect(prisma.task.create).toHaveBeenCalledWith({ data: taskToCreate });
     expect(result).toBe(tasks[tasks.length - 1]);
   });
 
@@ -75,31 +112,44 @@ describe('TasksService', () => {
     // Act
     const result = await repository.findAll();
     // Assert
+    expect(prisma.task.findMany).toHaveBeenCalled();
     expect(result).toBe(tasks);
-    expect(result.length).toBe(1);
   });
 
   it('should return a task by id', async () => {
     // Act
-    const result = await repository.findById(1);
+    const id = 1;
+    const result = await repository.findById(id);
     // Assert
+    expect(prisma.task.findUnique).toHaveBeenCalledWith({ where: { id } });
     expect(result).toBe(tasks[0]); // Verifica se a tarefa retornada é a que possui o id 1
   });
 
   it('should update a task by id', async () => {
     // Arrange
-    const updateData: Partial<Task> = { title: 'Updated Task Title' };
+    const id = 1;
+    const updateData: Partial<Task> = {
+      title: 'Updated Task Title',
+      description: 'updated description',
+      completed: true,
+    };
     // Act
-    const result = await repository.update(1, updateData);
+    const result = await repository.update(id, updateData);
     // Assert
-    expect(result.title).toBe(updateData.title); // Verifica se o título foi atualizado
+    expect(prisma.task.update).toHaveBeenCalledWith({
+      where: { id },
+      data: updateData,
+    });
+    expect(result).toEqual({ ...result, ...updateData }); // Verifica se o título foi atualizado
   });
 
   it('should delete a task by id', async () => {
     // Act
-    const result = await repository.delete(1);
+    const task = tasks[0];
+    const id = task.id;
+    const result = await repository.delete(id);
     // Assert
-    expect(result).toBe(tasks[0]); // Verifica se a tarefa deletada é a correta
-    expect(tasks.length).toBe(0); // Verifica se a tarefa foi removida da lista
+    expect(prisma.task.delete).toHaveBeenCalledWith({ where: { id } });
+    expect(result).toBe(task); // Verifica se a tarefa deletada é a correta
   });
 });

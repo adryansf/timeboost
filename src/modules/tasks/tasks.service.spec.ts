@@ -79,6 +79,7 @@ describe('TasksService', () => {
               const taskIndex = tasks.findIndex((task) => task.id === id);
               return tasks.splice(taskIndex, 1)[0];
             }),
+            findAll: jest.fn(() => tasks),
           },
         },
       ],
@@ -130,7 +131,7 @@ describe('TasksService', () => {
     // Assert
     expect(result).toEqual({
       ...createTaskDto,
-      id: tasks[tasks.length - 1].id + 1,
+      id: tasks[tasks.length - 1].id,
       completed: false,
       createdAt: expect.any(Date),
     });
