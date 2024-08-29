@@ -9,4 +9,6 @@ export const validationMessages = {
   IsDate: (fieldName: string) => `O campo ${fieldName} deve ser uma data.`,
   IsBoolean: (fieldName: string) =>
     `O campo ${fieldName} deve ser uma boolean.`,
+  IsPositive: (fieldName: string) =>
+    `O campo ${fieldName} deve ser um valor positivo.`,
 };

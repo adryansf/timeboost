@@ -8,5 +8,7 @@ export const exceptionMessages = {
   },
   task: {
     NotFound: 'Tarefa não encontrada.',
+  level: {
+    NotFound: 'Level não encontrado.',
   },
 };
