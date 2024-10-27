@@ -2,6 +2,17 @@ import { PrismaService } from '@/database/prisma.service';
 import { User } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
+export interface PaginationParams {
+  take: number;
+  skip: number;
+  where: {
+    username?: {
+      contains: string;
+      mode: 'insensitive' | 'default';
+    };
+  };
+}
+
 @Injectable()
 export class UserRepository {
   constructor(private prisma: PrismaService) {}
@@ -41,15 +52,16 @@ export class UserRepository {
   async findWithPagination({
     take,
     skip,
-  }: {
-    take: number;
-    skip: number;
-  }): Promise<[number, User[]]> {
+    where,
+  }: PaginationParams): Promise<[number, User[]]> {
     return this.prisma.$transaction([
-      this.prisma.user.count(),
+      this.prisma.user.count({
+        where,
+      }),
       this.prisma.user.findMany({
         skip,
         take,
+        where,
       }),
     ]);
   }

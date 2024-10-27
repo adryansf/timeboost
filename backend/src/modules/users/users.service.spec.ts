@@ -48,8 +48,18 @@ describe('UsersService', () => {
             findByEmail: jest.fn(async (email: string) =>
               users.find((u) => u.email == email),
             ),
-            findWithPagination: jest.fn(() =>
-              Promise.resolve([users.length, users]),
+            findWithPagination: jest.fn(
+              ({ where }: { where?: { username?: { contains?: string } } }) =>
+                where && where?.username && where?.username?.contains
+                  ? Promise.resolve([
+                      users.filter((u) =>
+                        u.username.includes(where?.username?.contains),
+                      ).length,
+                      users.filter((u) =>
+                        u.username.includes(where?.username?.contains),
+                      ),
+                    ])
+                  : Promise.resolve([users.length, users]),
             ),
             create: jest.fn(async (data: CreateUserDto) => {
               const createdUser = {
@@ -235,6 +245,18 @@ describe('UsersService', () => {
       users,
       page: 1,
       totalUsers: users.length,
+    });
+  });
+
+  it('should find one user with pagination', async () => {
+    // Act
+    const username = 'user10';
+    const result = await service.findAll({ username, page: 1 });
+    // Assert
+    expect(result).toEqual({
+      users: users.filter((u) => u.username === username),
+      page: 1,
+      totalUsers: 1,
     });
   });
 });
