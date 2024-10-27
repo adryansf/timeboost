@@ -173,6 +173,7 @@ describe('UserRepository', () => {
     const result = await repository.findWithPagination({
       skip: PAGINATION.users * (page - 1),
       take: PAGINATION.users,
+      where: {},
     });
 
     // Assert

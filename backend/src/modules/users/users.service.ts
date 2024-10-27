@@ -23,6 +23,7 @@ import { PAGINATION } from '@/config/pagination';
 
 // Interfaces
 import { IConstructorPaginationUsersDto } from './dto/pagination-users.dto';
+import { PaginationParams } from './repository/user.repository';
 
 @Injectable()
 export class UsersService {
@@ -58,11 +59,21 @@ export class UsersService {
   }
 
   async findAll(queryDto: FindAllUsersDto) {
-    const { page = 1 } = queryDto;
+    const { page = 1, username = '' } = queryDto;
+
+    const where: PaginationParams['where'] = {};
+
+    if (username) {
+      where.username = {
+        contains: username,
+        mode: 'insensitive',
+      };
+    }
 
     const [count, users] = await this.repository.findWithPagination({
       skip: PAGINATION.users * (page - 1),
       take: PAGINATION.users,
+      where,
     });
 
     return { totalUsers: count, users, page } as IConstructorPaginationUsersDto;

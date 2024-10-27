@@ -4,7 +4,8 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --secondary: #fcde5c;
+  --primary: #004aad;
 }
 
 body {
