@@ -1,18 +1,18 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import Levels from "./page";
+import Tasks from "./page";
 
-describe("Levels", () => {
-  it("should render CreateLevelButtonDialog, and ListLevels components", () => {
-    render(<Levels />);
+describe("Tasks", () => {
+  it("should render CreateTaskButtonDialog, and ListTasks components", () => {
+    render(<Tasks />);
 
-    // Check if the create level button is displayed
-    const createLevelButton = screen.getByRole("button", {
+    // Check if the create Task button is displayed
+    const createTaskButton = screen.getByRole("button", {
       name: "Adicionar Tarefa",
     });
-    expect(createLevelButton).toBeInTheDocument();
+    expect(createTaskButton).toBeInTheDocument();
 
-    // Check if the ListLevels component is displayed
-    const LevelsListHeader = screen.getByText("Tarefas");
-    expect(LevelsListHeader).toBeInTheDocument();
+    // Check if the ListTasks component is displayed
+    const TasksListHeader = screen.getByText("Tarefas");
+    expect(TasksListHeader).toBeInTheDocument();
   });
 });
