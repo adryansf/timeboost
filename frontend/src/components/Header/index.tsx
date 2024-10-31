@@ -23,11 +23,11 @@ const pages = [
     icon: UsersIcon,
     to: "/usuarios",
   },
-  // {
-  //   name: "Tarefas",
-  //   icon: ListTodoIcon,
-  //   to: "/tarefas",
-  // },
+  {
+    name: "Tarefas",
+    icon: ListTodoIcon,
+    to: "/tarefas",
+  },
   // {
   //   name: "Levels",
   //   icon: CircleFadingArrowUpIcon,
